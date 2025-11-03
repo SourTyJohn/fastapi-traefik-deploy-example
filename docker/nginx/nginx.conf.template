@@ -1,0 +1,11 @@
+server {
+    listen       ${NGINX_SERVER_PORT};
+    server_name  nginx-static-media-server;
+
+    # ----------------------------- FILES ----------------------------- #
+    location / {
+        sendfile   on;
+        tcp_nopush on;
+        root /usr/share/nginx/;
+    }
+}
