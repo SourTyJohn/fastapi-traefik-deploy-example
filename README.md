@@ -39,6 +39,7 @@ POSTGRES_DB=default
 
 
 # NETWORK
+NETWORK_BACKEND_URL=/api
 NETWORK_BACKEND_HOST=app
 NETWORK_BACKEND_PORT=8000
 
@@ -48,10 +49,9 @@ NETWORK_DATABASE_PORT=5432
 NETWORK_NGINX_HOST=nginx
 NETWORK_NGINX_PORT=6060
 NETWORK_NGINX_STATIC_URL=/static/
-NETWORK_NGINX_MEDIA_URL=/media/
 
 NETWORK_TRAEFIK_HOST=app
-NETWORK_TRAEFIK_PORT=5000
+NETWORK_TRAEFIK_PORT=80  # you may replace it with other, if system does not allow 80
 NETWORK_TRAEFIK_DASHBOARD_PORT=9000
 
 
@@ -108,5 +108,6 @@ make docker-full-rerun
 
 ## Running
 
-http://localhost:5000/docs for FastAPI swagger view
+http://localhost/api/docs for FastAPI swagger view
+
 http://localhost:9000 for traefik dashboard
