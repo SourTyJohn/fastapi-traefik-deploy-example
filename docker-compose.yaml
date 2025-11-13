@@ -42,7 +42,6 @@ services:
             timeout: 5s
             retries: 5
         networks:
-          - default
           - proxy-public
         volumes:
           - db-data:/var/lib/postgresql/data
@@ -63,14 +62,14 @@ services:
                 condition: service_healthy
         restart: unless-stopped
         networks:
-            - default
             - proxy-public
         expose:
             - ${NETWORK_BACKEND_PORT}
         labels:
             # HTTP
             - traefik.enable=true
-            - traefik.http.routers.app.rule=Host(`${DOMAIN_URL}`)
+            - traefik.docker.network=proxy-public
+            - traefik.http.routers.app.rule=Host(`${DOMAIN_URL}`) && PathPrefix(`${NETWORK_BACKEND_URL}`)
             - traefik.http.services.app.loadbalancer.server.port=${NETWORK_BACKEND_PORT}
             - traefik.http.routers.app.entrypoints=web
 
@@ -91,7 +90,6 @@ services:
             app:
                 condition: service_started
         networks:
-            - default
             - proxy-public
         labels:
             # HTTP

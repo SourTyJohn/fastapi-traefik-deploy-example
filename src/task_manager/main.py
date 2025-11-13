@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi.security import APIKeyHeader
+from fastapi import FastAPI, Depends
 
 from dishka.integrations.fastapi import setup_dishka as setup_dishka_fastapi
 
@@ -13,8 +14,19 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         debug=True,
-        openapi_url=f"{config.web.NETWORK_BACKEND_URL}/openapi.jsom",
-        docs_url=f"{config.web.NETWORK_BACKEND_URL}/docs",
+        root_path=f"{config.web.NETWORK_BACKEND_URL}",
+        # openapi_url=f"{config.web.NETWORK_BACKEND_URL}/openapi.json",
+        # docs_url=f"{config.web.NETWORK_BACKEND_URL}/docs",
+        # for displaing "Authorize" button
+        dependencies=[
+            Depends(
+                APIKeyHeader(
+                    name=config.auth.TOKEN_HEADER_NAME,
+                    auto_error=False,
+                )
+            )
+        ],
+        #
     )
     app.include_router(api_router)
     setup_dishka_fastapi(di_container, app)

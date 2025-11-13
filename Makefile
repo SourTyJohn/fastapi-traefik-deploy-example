@@ -45,5 +45,5 @@ docker-full-rerun:
 docker-fast-rerun:
 	docker compose -f ${COMPOSE_FILE} down app
 	docker rmi main_app_image
-	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE} up -d --build
+	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE} up --build
 	docker compose -f ${COMPOSE_FILE} logs

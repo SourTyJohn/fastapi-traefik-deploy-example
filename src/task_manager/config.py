@@ -46,7 +46,7 @@ def load_env_config() -> Config:
     )
 
     auth = AuthConfig(
-        TOKEN_HEADER_NAME="Token",
+        TOKEN_HEADER_NAME="Authorization",
         TOKEN_AUTH_SCHEME="Bearer",
         TOKEN_EXPIRE_TIMEDELTA=timedelta(days=1),
     )

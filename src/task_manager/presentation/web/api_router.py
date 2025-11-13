@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from .api import task_create, user_register
 
 
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter()
 
 
 # USERS

@@ -31,5 +31,6 @@ services:
             # HTTP
             - "traefik.enable=true"
             - "traefik.http.middlewares.traefik-compress.compress=true"
+            - "traefik.docker.network=proxy-public"
             - "traefik.http.routers.traefik.service=api@internal"
             - "traefik.http.routers.traefik.middlewares=traefik-compress"
