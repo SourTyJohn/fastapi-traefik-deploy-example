@@ -1,0 +1,26 @@
+[project]
+name = "fastapi-traefik-example"
+version = "0.1.0"
+description = "Simple example project with fastapi app, traefik reverse proxy, postgres and nginx for serving static files "
+authors = [
+    {name = "SourTyJohn",email = "mr.ukhov@list.ru"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "fastapi (>=0.120.4,<0.121.0)",
+    "alembic (>=1.17.1,<2.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "loguru (>=0.7.3,<0.8.0)",
+    "dishka (>=1.7.2,<2.0.0)",
+    "psycopg (>=3.2.12,<4.0.0)",
+    "psycopg-binary (>=3.2.12,<4.0.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "passlib (>=1.7.4,<2.0.0)",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,83 +1,112 @@
-# Ja Pierdole
+# FastAPI + Traefik + Nginx + Postgres 
 
+- [x] FastAPI backend implementing "Clean Architecture"
+- [x] PostgreSQL database for persistent storage
+- [x] Nginx static files server
+- [x] Traefik proxy
+- [ ] Redis based api token verification
+- [ ] Traefik letsencrypt SSL for HTTPS
+- [ ] Frontend
+- [ ] GitHub Actions CI/CD
 
-## .env file
+src directory stores backend
+docker directory stores Dockerfiles and entrypoints
+
+## .env File
 
 ```
-SECRET_KEY=example_secret_key
-DEBUG=True
-ALLOWED_HOSTS=localhost, 127.0.0.1
-CSRF_TRUSTED_ORIGINS=http://localhost, http://127.0.0.1
+CERTRESOLVER=letsencrypt
 
-DJANGO_SUPERUSER_USERNAME=example_username
-DJANGO_SUPERUSER_EMAIL=admin@example.com
-DJANGO_SUPERUSER_PASSWORD=example_password
 
-WEB_HOST=app
-WEB_PORT=8000
-
-NGINX_SERVER_PORT=6060
-STATIC_URL=/static/
-MEDIA_URL=/media/
-
-DB_PASSWORD=example_password
-DB_USER=example_user
-DB_HOST=postgres-db
-DB_NAME=newsdb
-
-DOMAIN_EMAIL=<leave_empty_if_letsencrypt_is_not_used>
+# DOMAIN
+DOMAIN_EMAIL=  # for letsencrypt certresolver if you use real domain
 DOMAIN_URL=localhost
 
-TRAEFIK_NAME_TRAEFIK=traefik
-TRAEFIK_NAME_APP=app
-TRAEFIK_NAME_NGINX=nginx-server
 
-CERTRESOLVER=letsencrypt
+# BACKEND
+BACKEND_SECRET_KEY=chagethis
+BACKEND_DEBUG=True
+BACKEND_ALLOWED_HOSTS=localhost, 127.0.0.1
+BACKEND_CSRF_TRUSTED_ORIGINS=http://localhost, http://127.0.0.1
+BACKEND_DB_ECHO=0  # sqlalchemy db_echo
+BACKEND_DB_NAME=backend
+
+
+# DATABASE
+POSTGRES_PASSWORD=chagethis
+POSTGRES_USER=chagethis
+POSTGRES_DB=default
+
+
+# NETWORK
+NETWORK_BACKEND_HOST=app
+NETWORK_BACKEND_PORT=8000
+
+NETWORK_DATABASE_HOST=postgres-db
+NETWORK_DATABASE_PORT=5432
+
+NETWORK_NGINX_HOST=nginx
+NETWORK_NGINX_PORT=6060
+NETWORK_NGINX_STATIC_URL=/static/
+NETWORK_NGINX_MEDIA_URL=/media/
+
+NETWORK_TRAEFIK_HOST=app
+NETWORK_TRAEFIK_PORT=5000
+NETWORK_TRAEFIK_DASHBOARD_PORT=9000
+
+
+#
+MAKE_MIGRATIONS_DB_URI=postgresql+psycopg://chagethis
 ```
+
+## Build Python Venv for Development
+
+```
+make build-python-venv
+```
+
+I am using Ruff (charliermarsh.ruff) extension for code formating
 
 
 ## Local deploy with http using compose
 
+Majority of required operations implemented in Makefile for convenience.
+You may read it, to look under the hood of all operations.
 
 #### First run
 
+Firstly, you need to create network and up traefik proxy service using:
+
 ```
-sudo make docker-dev-build-run
+make docker-up-proxy
+```
+
+> If Traefik service gives you Permission Denied error for docker.sock you can either:
+> 1) add current user to docker group and relogin
+> 2) launch command with sudo (admin privileges)
+>
+> All docker related commands should be executed from single user
+
+And after it, you ready to up other services.
+
+```
+make docker-build-run
 ```
 
 #### Rerun with soft rebuild of web-app service
 
 ```
-sudo make docker-dev-fast-rerun
+make docker-fast-rerun
 ```
 
-#### Rerun with docker system prune -af
+#### Rerun from scratch
 
 ```
-sudo make docker-dev-full-rerun
+make docker-full-rerun
 ```
 
 
-## CI/CD github-runner
+## Running
 
-#### install
-
-```
-sudo adduser runner
-```
-
-```
-sudo usermod -aG docker runner
-```
-
-Use commands from github.repository.settings.runners
-Run confing/run commands with prefix: sudo -u runner
-Install github-runner to ~/actions-runner/
-
-```
-sudo ~/actions-runner/svc.sh install runner
-```
-
-```
-sudo ~/actions-runner/svc.sh start 
-```
+http://localhost:5000/docs for FastAPI swagger view
+http://localhost:9000 for traefik dashboard

@@ -1,58 +1,49 @@
+APP_BASE_IMAGE := web-app-base
+APP_BASE_IMAGE_TAG := latest
+
+ENV_FILE := .env
+COMPOSE_FILE:= docker-compose.yaml
+COMPOSE_FILE_PROXY:= docker-compose.traefik.yaml
+
+.PHONY:
 .ONESHELL:
 
 
-APP_BASE_IMAGE := web-app-base
-APP_BASE_IMAGE_TAG := latest
-COMPOSE_ENV_FILE := .env
-COMPOSE_ENV_FILE_DEV := .env
+build-python-venv:
+	python3 -m venv .venv
+	source ./.venv/bin/activate
+	pip3 install poetry
+	poetry install --no-root
 
 
-docker-actions-build:
-# this step is used in github actions workflow
-	docker build -t ${APP_BASE_IMAGE}:${APP_BASE_IMAGE_TAG} -f ./docker/Dockerfile.base .
-	docker compose --env-file ${COMPOSE_ENV_FILE} build
+docker-up-proxy:
+	docker network create proxy-public
+	docker compose -f ${COMPOSE_FILE_PROXY} down
+	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE_PROXY} up -d --build
+	docker compose -f ${COMPOSE_FILE_PROXY} logs
+
+
+docker-down-proxy:
+	docker compose -f ${COMPOSE_FILE_PROXY} down
+	docker network rm proxy-public
 
 
 docker-build-run:
-	sudo docker build -t ${APP_BASE_IMAGE}:${APP_BASE_IMAGE_TAG} -f ./docker/Dockerfile.base .
-	sudo docker compose --env-file ${COMPOSE_ENV_FILE} up -d 
+	docker build -t ${APP_BASE_IMAGE}:${APP_BASE_IMAGE_TAG} -f ./docker/Dockerfile.base .
+	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE} up -d --build
+	docker compose -f ${COMPOSE_FILE} logs
 
 
 docker-full-rerun:
-	sudo docker compose down
-	sudo docker system prune -af
-	sudo make docker-build-run
+	docker compose -f ${COMPOSE_FILE} down
+	docker compose -f ${COMPOSE_FILE} rm -f
+	docker rmi $$(docker compose -f ${COMPOSE_FILE} images -q) -f
+	make docker-build-run
+	docker compose -f ${COMPOSE_FILE} logs
 
 
 docker-fast-rerun:
-	sudo docker compose down app
-	sudo docker rmi main_app_image
-	sudo docker compose --env-file ${COMPOSE_ENV_FILE} up -d
-
-
-docker-dev-build-run:
-	sudo docker build -t ${APP_BASE_IMAGE}:${APP_BASE_IMAGE_TAG} -f ./docker/Dockerfile.base .
-	sudo docker compose --env-file ${COMPOSE_ENV_FILE_DEV} -f docker-compose-dev.yaml up -d 
-
-
-docker-dev-full-rerun:
-	sudo docker compose down
-	sudo docker compose down -f docker-compose-dev.yaml
-	sudo docker system prune -af
-	sudo make docker-dev-build-run
-
-
-docker-dev-fast-rerun:
-	sudo docker compose down app
-	sudo docker rmi main_app_image
-	sudo docker compose --env-file ${COMPOSE_ENV_FILE_DEV} -f docker-compose-dev.yaml up -d
-
-
-makemigrations:
-	cd polski_news
-	python3 manage.py makemigrations
-
-
-migrate:
-	cd polski_news
-	python3 manage.py migrate
+	docker compose -f ${COMPOSE_FILE} down app
+	docker rmi main_app_image
+	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE} up -d
+	docker compose -f ${COMPOSE_FILE} logs

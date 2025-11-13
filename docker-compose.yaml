@@ -1,6 +1,6 @@
 networks:
-    default:
-        name: traefik_default
+    proxy-public:
+        external: true
 
 
 volumes:
@@ -10,146 +10,92 @@ volumes:
     letsencrypt:
 
 
-x-environment: &default-environment
+x-backend-env: &backend-env
     environment:
-        - SECRET_KEY
-        - DEBUG
-        - ALLOWED_HOSTS
-        - CSRF_TRUSTED_ORIGINS
-
-        - DJANGO_SUPERUSER_USERNAME
-        - DJANGO_SUPERUSER_EMAIL
-        - DJANGO_SUPERUSER_PASSWORD
-
-        - WEB_HOST
-        - WEB_PORT
-
-        - DB_PASSWORD
-        - DB_USER
-        - DB_HOST
-        - DB_NAME
-
-        - STATIC_URL
-        - MEDIA_URL
+        - DB_CONNECTION_STRING=${POSTGRES_USER}:${POSTGRES_PASSWORD}@${NETWORK_DATABASE_HOST}:${NETWORK_DATABASE_PORT}/${BACKEND_DB_NAME}
+        - BACKEND_SECRET_KEY
+        - BACKEND_DEBUG
+        - BACKEND_ALLOWED_HOSTS
+        - BACKEND_CSRF_TRUSTED_ORIGINS
+        - BACKEND_DB_ECHO
+        - NETWORK_BACKEND_PORT
+        - NETWORK_BACKEND_URL
+x-postgres-env: &postgres-env
+    environment:
+        - PGDATA=/var/lib/postgresql/data
+        - DATABASES=${BACKEND_DB_NAME}
+        - POSTGRES_PASSWORD
+        - POSTGRES_USER 
+        - POSTGRES_DB 
+x-nginx-env: &nginx-env
+    environment:
+        - NETWORK_NGINX_PORT
 
 
 services:
     postgres-db:
-        image: postgres:17.5-bullseye
-        container_name: postgres-db
-        environment:
-            POSTGRES_PASSWORD: ${DB_PASSWORD}
-            POSTGRES_USER: ${DB_USER}
-            POSTGRES_DB: ${DB_NAME}
-            PGDATA: /var/lib/postgresql/data
+        << : *postgres-env
+        image: postgres:18.0
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
             interval: 10s
             timeout: 5s
             retries: 5
+        networks:
+          - default
+          - proxy-public
         volumes:
           - db-data:/var/lib/postgresql/data
+          - ./docker/postgres-init/:/docker-entrypoint-initdb.d/
         ports:
           - "5432:5432"
         restart: unless-stopped
 
 
     app:
+        << : *backend-env
         image: main_app_image
-        container_name: web-app
         build:
             context: .
-            dockerfile: ./docker/Dockerfile.app
-        volumes:
-          - static-files:/usr/share/django-news-server/staticfiles
-          - media-files:/usr/share/django-news-server/mediafiles
+            dockerfile: ./docker/backend/Dockerfile.app
         depends_on:
             postgres-db:
                 condition: service_healthy
         restart: unless-stopped
-        << : *default-environment
+        networks:
+            - default
+            - proxy-public
+        expose:
+            - ${NETWORK_BACKEND_PORT}
         labels:
             # HTTP
-          - traefik.enable=true
-          - traefik.http.routers.${TRAEFIK_NAME_APP}.rule=Host(`${DOMAIN_URL}`)  # <- rule
-          - traefik.http.services.${TRAEFIK_NAME_APP}.loadbalancer.server.port=${WEB_PORT}
-          - traefik.http.routers.${TRAEFIK_NAME_APP}.entrypoints=web
-            # HTTPS / SSL
-          - traefik.http.middlewares.${TRAEFIK_NAME_APP}_https.redirectscheme.scheme=https
-          - traefik.http.routers.${TRAEFIK_NAME_APP}.middlewares=${TRAEFIK_NAME_APP}_https@docker
-          - traefik.http.routers.${TRAEFIK_NAME_APP}_https.rule=Host(`${DOMAIN_URL}`)  # <- rule
-          - traefik.http.routers.${TRAEFIK_NAME_APP}_https.entrypoints=websecure
-          - traefik.http.routers.${TRAEFIK_NAME_APP}_https.tls=true
-          - traefik.http.routers.${TRAEFIK_NAME_APP}_https.tls.certresolver=${CERTRESOLVER}
+            - traefik.enable=true
+            - traefik.http.routers.app.rule=Host(`${DOMAIN_URL}`)
+            - traefik.http.services.app.loadbalancer.server.port=${NETWORK_BACKEND_PORT}
+            - traefik.http.routers.app.entrypoints=web
 
 
     nginx-server:
-        image: nginx:1.28.0
-        container_name: nginx-server
+        << : *nginx-env
+        image: nginx:1.29.0
         volumes:
             # Configuration
-          - type: bind
-            source: ./docker/nginx/nginx.conf.template
-            target: /etc/nginx/templates/default.conf.template
-            read_only: true
+            - type: bind
+              source: ./docker/nginx/nginx.conf.template
+              target: /etc/nginx/templates/default.conf.template
+              read_only: true
             # Static / Media
-          - static-files:/usr/share/nginx/static/
-          - media-files:/usr/share/nginx/media/
+            - static-files:/usr/share/nginx/static/
+            - media-files:/usr/share/nginx/media/
         depends_on:
             app:
                 condition: service_started
-        environment:
-          - NGINX_SERVER_PORT
+        networks:
+            - default
+            - proxy-public
         labels:
             # HTTP
-          - traefik.enable=true
-          - traefik.http.routers.${TRAEFIK_NAME_NGINX}.rule=PathPrefix(`${STATIC_URL}`) || PathPrefix(`${MEDIA_URL}`) # <- rule
-          - traefik.http.services.${TRAEFIK_NAME_NGINX}.loadbalancer.server.port=${NGINX_SERVER_PORT}
-          - traefik.http.routers.${TRAEFIK_NAME_NGINX}.entrypoints=web
-            # HTTPS / SSL
-          - traefik.http.middlewares.${TRAEFIK_NAME_NGINX}_https.redirectscheme.scheme=https  
-          - traefik.http.routers.${TRAEFIK_NAME_NGINX}.middlewares=${TRAEFIK_NAME_NGINX}_https@docker
-          - traefik.http.routers.${TRAEFIK_NAME_NGINX}_https.rule=PathPrefix(`${STATIC_URL}`) || PathPrefix(`${MEDIA_URL}`) # <- rule
-          - traefik.http.routers.${TRAEFIK_NAME_NGINX}_https.entrypoints=websecure
-          - traefik.http.routers.${TRAEFIK_NAME_NGINX}_https.tls=true
-          - traefik.http.routers.${TRAEFIK_NAME_NGINX}_https.tls.certresolver=${CERTRESOLVER}
-
-
-    traefik:
-        image: "traefik:v3.4"
-        container_name: "traefik"
-        security_opt:
-          - no-new-privileges:true
-        command:
-        #   - "--log.level=DEBUG"
-        
-            # HTTP
-          - "--api.insecure=true"
-          - "--providers.docker=true"
-          - "--providers.docker.exposedbydefault=false"
-          - "--entrypoints.web.address=:80"
-            # HTTPS / SSL
-          - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-          - "--entrypoints.websecure.address=:443"
-          - "--certificatesresolvers.${CERTRESOLVER}.acme.httpchallenge=true"
-          - "--certificatesresolvers.${CERTRESOLVER}.acme.httpchallenge.entrypoint=web"
-          - "--certificatesresolvers.${CERTRESOLVER}.acme.email=${DOMAIN_EMAIL}"
-          - "--certificatesresolvers.${CERTRESOLVER}.acme.storage=/letsencrypt/acme.json"
-        ports:
-          - "80:80"
-          - "443:443"
-          - "8081:8080"
-        volumes:
-          - "letsencrypt:/letsencrypt"
-          - "/var/run/docker.sock:/var/run/docker.sock:ro"
-        labels:
-            # HTTP
-          - "traefik.http.middlewares.traefik-compress.compress=true"
-          - "traefik.enable=true"
-          - "traefik.http.routers.${TRAEFIK_NAME_TRAEFIK}.rule=PathPrefix(`/traefik`)"
-          - "traefik.http.routers.${TRAEFIK_NAME_TRAEFIK}.service=api@internal"
-          - "traefik.http.routers.${TRAEFIK_NAME_TRAEFIK}.middlewares=traefik-compress"
-            # HTTPS / SSL
-          - "traefik.http.routers.${TRAEFIK_NAME_TRAEFIK}.entrypoints=websecure"
-          - "traefik.http.routers.${TRAEFIK_NAME_TRAEFIK}.tls.certresolver=${CERTRESOLVER}"
-          - "traefik.http.routers.dashboard.tls=true"
+            - traefik.enable=true
+            - traefik.http.routers.nginx-server.rule=PathPrefix(`${NETWORK_NGINX_STATIC_URL}`) # <- rule
+            - traefik.http.services.nginx-server.loadbalancer.server.port=${NETWORK_NGINX_PORT}
+            - traefik.http.routers.nginx-server.entrypoints=web
