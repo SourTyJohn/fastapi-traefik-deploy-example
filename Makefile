@@ -19,7 +19,7 @@ build-python-venv:
 docker-up-proxy:
 	docker network create proxy-public
 	docker compose -f ${COMPOSE_FILE_PROXY} down
-	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE_PROXY} up -d --build
+	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE_PROXY} up -d --build --remove-orphans
 	docker compose -f ${COMPOSE_FILE_PROXY} logs
 
 
@@ -45,5 +45,5 @@ docker-full-rerun:
 docker-fast-rerun:
 	docker compose -f ${COMPOSE_FILE} down app
 	docker rmi main_app_image
-	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE} up -d
+	docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE} up -d --build
 	docker compose -f ${COMPOSE_FILE} logs
