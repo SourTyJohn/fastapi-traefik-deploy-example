@@ -35,9 +35,9 @@ docker-build-run:
 
 
 docker-full-rerun:
-	docker compose -f ${COMPOSE_FILE} down
-	docker compose -f ${COMPOSE_FILE} rm -f
-	docker rmi $$(docker compose -f ${COMPOSE_FILE} images -q) -f
+	docker compose -f ${COMPOSE_FILE} down --rmi all
+	docker rmi ${APP_BASE_IMAGE}:${APP_BASE_IMAGE_TAG}
+	docker builder prune -f
 	make docker-build-run
 	docker compose -f ${COMPOSE_FILE} logs
 
