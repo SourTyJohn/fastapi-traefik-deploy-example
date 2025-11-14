@@ -14,6 +14,10 @@ from task_manager.application.interactors.realm_own_list import (
     RealmOwnListInteractor,
     RealmOwnListInteractorImpl,
 )
+from task_manager.application.interactors.realm_get import (
+    RealmGetInteractor,
+    RealmGetInteractorImpl,
+)
 from task_manager.application.interactors.user_register import (
     UserRegisterInteractor,
     UserRegisterInteractorImpl,
@@ -74,6 +78,19 @@ class ApiInteractorsProvider(Provider):
         user_gateway: UserGateway,
     ) -> RealmOwnListInteractor:
         return RealmOwnListInteractorImpl(
+            transaction,
+            realm_gateway,
+            user_gateway,
+        )
+
+    @provide
+    def realm_get(
+        self,
+        transaction: AsyncTransactionManager,
+        realm_gateway: RealmGateway,
+        user_gateway: UserGateway,
+    ) -> RealmGetInteractor:
+        return RealmGetInteractorImpl(
             transaction,
             realm_gateway,
             user_gateway,

@@ -8,3 +8,7 @@ class UsernameTakenExeption(Exception):
 
 class InvalidCredentialsException(Exception):
     pass
+
+
+class PermissionDeniedException(Exception):
+    pass

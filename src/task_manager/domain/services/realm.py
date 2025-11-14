@@ -1,6 +1,7 @@
 from task_manager.domain.models.realm import Realm
 from task_manager.domain.models.user import User
 from task_manager.domain.exceptions.user import UserHasNoIdException
+from task_manager.domain.exceptions.realm import RealmOwnershipException
 
 
 class RealmService:
@@ -14,3 +15,18 @@ class RealmService:
             name=name,
             description=description,
         )
+
+    def check_ownership(self, realm: Realm, user: User) -> None:
+        """Check if the user is the owner of the realm.
+
+        Raises RealmOwnershipException if the user is not the owner.
+        """
+        if user.uid is None:
+            raise RealmOwnershipException(
+                "User must have an ID to check ownership"
+            )
+
+        if realm.owner_uid != user.uid:
+            raise RealmOwnershipException(
+                "User is not the owner of this realm"
+            )
