@@ -57,4 +57,3 @@ class RealmUpdateInteractorImpl(RealmUpdateInteractor):
         await self.transaction.commit()
 
         return realm
-
