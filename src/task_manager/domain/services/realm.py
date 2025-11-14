@@ -30,3 +30,16 @@ class RealmService:
             raise RealmOwnershipException(
                 "User is not the owner of this realm"
             )
+
+    def update(self, realm: Realm, user: User, name: str, description: str | None) -> Realm:
+        """Update realm with new name and description.
+
+        Checks ownership before updating.
+        Raises RealmOwnershipException if the user is not the owner.
+        """
+        self.check_ownership(realm, user)
+
+        realm.name = name
+        realm.description = description
+
+        return realm

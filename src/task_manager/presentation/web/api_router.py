@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from .users import login, me, register
 
-from .realms import create, delete, get, list_owned
+from .realms import create, delete, get, list_owned, update
 
 
 api_router = APIRouter()
@@ -57,6 +57,13 @@ _realms_router.add_api_route(
     get.route,
     name="api:realm_get",
     methods=["GET"],
+)
+
+_realms_router.add_api_route(
+    "/{realm_id}",
+    update.route,
+    name="api:realm_update",
+    methods=["PUT"],
 )
 
 _realms_router.add_api_route(
