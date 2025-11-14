@@ -21,7 +21,7 @@ class Token:
 
 class TokenService:
     def _public_token_key(self) -> str:
-        return secrets.token_hex(16)
+        return secrets.token_hex(32)
 
     def generate(self, user_id: UserId, expire_timedelta: timedelta) -> Token:
         return Token(

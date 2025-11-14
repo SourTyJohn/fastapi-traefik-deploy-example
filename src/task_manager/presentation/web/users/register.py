@@ -1,8 +1,9 @@
 from fastapi import HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr, Field
 
 from dishka.integrations.fastapi import inject, FromDishka
 
+from task_manager.domain.models.user import UserId
 from task_manager.application.exceptions import UsernameTakenExeption
 from task_manager.application.interactors.user_register import (
     UserRegisterInteractor,
@@ -13,12 +14,17 @@ from task_manager.presentation.middlewares.bearer_auth import TokenGenerator
 
 
 class UserRegisterRequest(BaseModel):
-    username: str
-    password: str
+    username: str = Field(min_length=6, max_length=16)
+    password: SecretStr = Field(
+        min_length=6,
+        max_length=32,
+        examples=["secret_password"],
+    )
 
 
 class UserRegisterResponse(BaseModel):
-    token: str
+    user_id: UserId
+    token: str = Field(description="random_api_bearer_token_key")
 
 
 @inject
@@ -29,7 +35,10 @@ async def route(
 ) -> UserRegisterResponse:
     try:
         user_id = await register_user(
-            UserRegisterDTO(username=data.username, password=data.password)
+            UserRegisterDTO(
+                username=data.username,
+                password=data.password.get_secret_value(),
+            )
         )
     except UsernameTakenExeption:
         raise HTTPException(
@@ -38,4 +47,8 @@ async def route(
         )
 
     token = await auth_token_generator(user_id)
-    return UserRegisterResponse(token=token.token)
+
+    return UserRegisterResponse(
+        user_id=user_id,
+        token=token.token,
+    )

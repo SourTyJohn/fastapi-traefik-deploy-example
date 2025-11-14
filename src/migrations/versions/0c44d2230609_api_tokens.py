@@ -1,8 +1,8 @@
-"""api_token
+"""api_tokens
 
-Revision ID: c7c3d7dcc5a3
-Revises: 1d650b56ef31
-Create Date: 2025-11-11 19:57:05.595864
+Revision ID: 0c44d2230609
+Revises: e5715d5eaee8
+Create Date: 2025-11-14 18:37:01.162615
 
 """
 
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "c7c3d7dcc5a3"
-down_revision: Union[str, Sequence[str], None] = "1d650b56ef31"
+revision: str = "0c44d2230609"
+down_revision: Union[str, Sequence[str], None] = "e5715d5eaee8"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -1,8 +1,8 @@
-from .task import TaskGateway
+from .realm import RealmGateway
 from .user import UserGateway
 
 
 __all__ = (
-    "TaskGateway",
+    "RealmGateway",
     "UserGateway",
 )

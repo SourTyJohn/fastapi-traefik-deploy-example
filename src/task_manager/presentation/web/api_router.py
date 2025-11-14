@@ -1,17 +1,19 @@
 from fastapi import APIRouter
 
-from .api import task_create, user_register
+from .users import register
+
+from .realms import create, list_owned
 
 
 api_router = APIRouter()
 
 
 # USERS
-_users_router = APIRouter(prefix="/users")
+_users_router = APIRouter(prefix="/users", tags=["users"])
 
 _users_router.add_api_route(
     "/register",
-    user_register.route,
+    register.route,
     name="api:register",
     methods=["POST"],
 )
@@ -20,13 +22,20 @@ api_router.include_router(_users_router)
 
 
 # TASKS
-_tasks_router = APIRouter(prefix="/tasks")
+_realms_router = APIRouter(prefix="/realms", tags=["realms"])
 
-_tasks_router.add_api_route(
+_realms_router.add_api_route(
     "/create",
-    task_create.route,
-    name="api:task_create",
+    create.route,
+    name="api:realm_create",
     methods=["POST"],
 )
 
-api_router.include_router(_tasks_router)
+_realms_router.add_api_route(
+    "/own",
+    list_owned.route,
+    name="api:realm_own_list",
+    methods=["GET"],
+)
+
+api_router.include_router(_realms_router)

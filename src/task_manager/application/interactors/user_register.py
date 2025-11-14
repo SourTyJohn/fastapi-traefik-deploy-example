@@ -40,14 +40,14 @@ class UserRegisterInteractorImpl(UserRegisterInteractor):
         self.user_gateway = user_gateway
 
     async def __call__(self, data: UserRegisterDTO) -> UserId:
-        if await self.user_gateway.get_by_username(data.username) is not None:
+        if await self.user_gateway.read_by_username(data.username) is not None:
             raise UsernameTakenExeption()
 
         user = UserService().register(
             username=data.username,
             password=data.password,
         )
-        user_id = await self.user_gateway.save(user)
+        user_id = await self.user_gateway.add(user)
 
         await self.transaction.commit()
 

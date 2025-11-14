@@ -9,20 +9,21 @@ class UserGatewayPostgres(UserGateway):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get(self, pk: UserId) -> User | None:
-        return await self.session.get(User, pk)
+    async def get(self, pk: UserId) -> User:
+        return await self.session.get_one(User, pk)
 
-    async def get_existing(self, pk: UserId) -> User:
-        user = await self.session.get(User, pk)
-        assert user
-        return user
-
-    async def get_by_username(self, username: str) -> User | None:
-        stmt = select(User).filter_by(username=username)
-        return await self.session.scalar(stmt)
-
-    async def save(self, user: User) -> UserId:
+    async def add(self, user: User) -> UserId:
         self.session.add(user)
         await self.session.flush()
-        assert user.uid, "User ID has not been generated on db side"
+        assert user.uid, "ID has not been generated on DB side"
         return user.uid
+
+    async def update(self, user: User) -> None:
+        raise NotImplementedError
+
+    async def delete(self, user: User) -> None:
+        raise NotImplementedError
+
+    async def read_by_username(self, username: str) -> User | None:
+        stmt = select(User).filter_by(username=username)
+        return await self.session.scalar(stmt)

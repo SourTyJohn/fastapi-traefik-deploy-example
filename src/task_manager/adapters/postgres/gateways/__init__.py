@@ -1,8 +1,8 @@
-from .task import TaskGatewayPostgres
+from .realm import RealmGatewayPostgres
 from .user import UserGatewayPostgres
 
 
 __all__ = (
-    "TaskGatewayPostgres",
+    "RealmGatewayPostgres",
     "UserGatewayPostgres",
 )

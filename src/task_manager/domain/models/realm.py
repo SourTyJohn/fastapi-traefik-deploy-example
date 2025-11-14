@@ -1,16 +1,16 @@
 from dataclasses import dataclass
-from typing import NewType
+from typing import NewType, Optional
 
 from task_manager.domain.models.id import IdType
 from task_manager.domain.models.user import UserId
 
 
-TaskId = NewType("TaskId", IdType)
+RealmId = NewType("RealmId", IdType)
 
 
 @dataclass
-class Task:
-    uid: TaskId | None
+class Realm:
+    uid: RealmId | None
     owner_uid: UserId
     name: str
-    description: str
+    description: Optional[str]

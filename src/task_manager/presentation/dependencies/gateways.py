@@ -1,9 +1,9 @@
 from dishka import Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from task_manager.application.gateways import TaskGateway, UserGateway
+from task_manager.application.gateways import RealmGateway, UserGateway
 from task_manager.adapters.postgres.gateways import (
-    TaskGatewayPostgres,
+    RealmGatewayPostgres,
     UserGatewayPostgres,
 )
 
@@ -16,5 +16,5 @@ class GatewaysProvider(Provider):
         return UserGatewayPostgres(_s)
 
     @provide
-    def task(self, _s: AsyncSession) -> TaskGateway:
-        return TaskGatewayPostgres(_s)
+    def realm(self, _s: AsyncSession) -> RealmGateway:
+        return RealmGatewayPostgres(_s)

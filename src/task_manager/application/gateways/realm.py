@@ -1,35 +1,36 @@
-from typing import Protocol
+from typing import Protocol, Sequence
 from abc import abstractmethod
 
 from task_manager.application.common import AsyncTransactionManager
-from task_manager.domain.models.user import User, UserId
+from task_manager.domain.models import Realm, RealmId
 
 
-class UserGateway(Protocol):
-    """Gateway to access users data.
-    Use this at application level in interactors.
-    """
-
+class RealmGateway(Protocol):
     @abstractmethod
     def __init__(self, session: AsyncTransactionManager) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    async def get(self, pk: UserId) -> User:
+    async def get(self, pk: RealmId) -> Realm:
         raise NotImplementedError
 
     @abstractmethod
-    async def add(self, user: User) -> UserId:
+    async def add(self, realm: Realm) -> RealmId:
         raise NotImplementedError
 
     @abstractmethod
-    async def update(self, user: User) -> None:
+    async def update(self, realm: Realm) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    async def delete(self, user: User) -> None:
+    async def delete(self, realm: Realm) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    async def read_by_username(self, username: str) -> User | None:
+    async def read(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+        **filters,
+    ) -> Sequence[Realm]:
         raise NotImplementedError

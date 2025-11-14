@@ -3,11 +3,15 @@ from dishka import Provider, Scope, provide
 from task_manager.application.common import (
     AsyncTransactionManager,
 )
-from task_manager.application.gateways import TaskGateway, UserGateway
+from task_manager.application.gateways import RealmGateway, UserGateway
 
-from task_manager.application.interactors.task_add import (
-    TaskCreateInteractor,
-    TaskCreateInteractorImpl,
+from task_manager.application.interactors.realm_add import (
+    RealmCreateInteractor,
+    RealmCreateInteractorImpl,
+)
+from task_manager.application.interactors.realm_own_list import (
+    RealmOwnListInteractor,
+    RealmOwnListInteractorImpl,
 )
 from task_manager.application.interactors.user_register import (
     UserRegisterInteractor,
@@ -30,14 +34,27 @@ class ApiInteractorsProvider(Provider):
         )
 
     @provide
-    def task_create(
+    def realm_create(
         self,
         transaction: AsyncTransactionManager,
-        task_gateway: TaskGateway,
+        realm_gateway: RealmGateway,
         user_gateway: UserGateway,
-    ) -> TaskCreateInteractor:
-        return TaskCreateInteractorImpl(
+    ) -> RealmCreateInteractor:
+        return RealmCreateInteractorImpl(
             transaction,
-            task_gateway,
+            realm_gateway,
+            user_gateway,
+        )
+
+    @provide
+    def realm_own_list(
+        self,
+        transaction: AsyncTransactionManager,
+        realm_gateway: RealmGateway,
+        user_gateway: UserGateway,
+    ) -> RealmOwnListInteractor:
+        return RealmOwnListInteractorImpl(
+            transaction,
+            realm_gateway,
             user_gateway,
         )
