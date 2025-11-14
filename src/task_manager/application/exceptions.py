@@ -4,3 +4,7 @@ class ApplicationException(Exception):
 
 class UsernameTakenExeption(Exception):
     pass
+
+
+class InvalidCredentialsException(Exception):
+    pass

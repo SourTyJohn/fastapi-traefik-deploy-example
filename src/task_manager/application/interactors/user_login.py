@@ -1,23 +1,14 @@
 from typing import Protocol
-from dataclasses import dataclass
 from abc import abstractmethod
 
 from task_manager.application.common import AsyncTransactionManager
 from task_manager.application.common.encryption import EncryptionContext
 from task_manager.application.gateways.user import UserGateway
-from task_manager.application.exceptions import UsernameTakenExeption
-
-from task_manager.domain.services.user import UserService
+from task_manager.application.exceptions import InvalidCredentialsException
 from task_manager.domain.models.user import UserId
 
 
-@dataclass
-class UserRegisterDTO:
-    username: str
-    password: str
-
-
-class UserRegisterInteractor(Protocol):
+class UserLoginInteractor(Protocol):
     @abstractmethod
     def __init__(
         self,
@@ -28,11 +19,11 @@ class UserRegisterInteractor(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    async def __call__(self, data: UserRegisterDTO) -> UserId:
+    async def __call__(self, username: str, password: str) -> UserId:
         raise NotImplementedError
 
 
-class UserRegisterInteractorImpl(UserRegisterInteractor):
+class UserLoginInteractorImpl(UserLoginInteractor):
     def __init__(
         self,
         transaction: AsyncTransactionManager,
@@ -43,18 +34,17 @@ class UserRegisterInteractorImpl(UserRegisterInteractor):
         self.user_gateway = user_gateway
         self.encryption_context = encryption_context
 
-    async def __call__(self, data: UserRegisterDTO) -> UserId:
-        if await self.user_gateway.read_by_username(data.username) is not None:
-            raise UsernameTakenExeption()
+    async def __call__(self, username: str, password: str) -> UserId:
+        user = await self.user_gateway.read_by_username(username)
+        if user is None:
+            raise InvalidCredentialsException()
 
-        hashed_password = self.encryption_context.hash(data.password)
+        hashed_password = user.password
 
-        user = UserService().register(
-            username=data.username,
-            password=hashed_password,
-        )
-        user_id = await self.user_gateway.add(user)
+        if not self.encryption_context.verify(password, hashed_password):
+            raise InvalidCredentialsException()
 
-        await self.transaction.commit()
+        if user.uid is None:
+            raise InvalidCredentialsException()
 
-        return user_id
+        return user.uid

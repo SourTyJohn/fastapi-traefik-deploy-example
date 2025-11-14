@@ -14,7 +14,7 @@ class EncryptionContext(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def verify(self, hash: str, data: str):
+    def verify(self, data: str, hash: str):
         raise NotImplementedError
 
 
@@ -28,5 +28,5 @@ class EncryptionContextPassword(EncryptionContext):
     def hash(self, data: str):
         return self.context.hash(data)
 
-    def verify(self, hash: str, data: str):
+    def verify(self, data: str, hash: str):
         return self.context.verify(data, hash)

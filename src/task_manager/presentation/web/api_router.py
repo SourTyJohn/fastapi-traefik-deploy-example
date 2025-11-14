@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .users import me, register
+from .users import login, me, register
 
 from .realms import create, list_owned
 
@@ -15,6 +15,13 @@ _users_router.add_api_route(
     "/register",
     register.route,
     name="api:register",
+    methods=["POST"],
+)
+
+_users_router.add_api_route(
+    "/login",
+    login.route,
+    name="api:login",
     methods=["POST"],
 )
 
