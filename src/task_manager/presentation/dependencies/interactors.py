@@ -18,6 +18,14 @@ from task_manager.application.interactors.realm_get import (
     RealmGetInteractor,
     RealmGetInteractorImpl,
 )
+from task_manager.application.interactors.realm_delete import (
+    RealmDeleteInteractor,
+    RealmDeleteInteractorImpl,
+)
+from task_manager.application.interactors.realm_update import (
+    RealmUpdateInteractor,
+    RealmUpdateInteractorImpl,
+)
 from task_manager.application.interactors.user_register import (
     UserRegisterInteractor,
     UserRegisterInteractorImpl,
@@ -91,6 +99,32 @@ class ApiInteractorsProvider(Provider):
         user_gateway: UserGateway,
     ) -> RealmGetInteractor:
         return RealmGetInteractorImpl(
+            transaction,
+            realm_gateway,
+            user_gateway,
+        )
+
+    @provide
+    def realm_delete(
+        self,
+        transaction: AsyncTransactionManager,
+        realm_gateway: RealmGateway,
+        user_gateway: UserGateway,
+    ) -> RealmDeleteInteractor:
+        return RealmDeleteInteractorImpl(
+            transaction,
+            realm_gateway,
+            user_gateway,
+        )
+
+    @provide
+    def realm_update(
+        self,
+        transaction: AsyncTransactionManager,
+        realm_gateway: RealmGateway,
+        user_gateway: UserGateway,
+    ) -> RealmUpdateInteractor:
+        return RealmUpdateInteractorImpl(
             transaction,
             realm_gateway,
             user_gateway,

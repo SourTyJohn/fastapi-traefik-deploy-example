@@ -9,14 +9,6 @@ COMPOSE_FILE_PROXY:= docker-compose.traefik.yaml
 .ONESHELL:
 
 
-# Building python virtual environment and installing dependencies
-build-python-venv:
-	python3 -m venv .venv
-	source ./.venv/bin/activate
-	pip3 install poetry
-	poetry install --no-root
-
-
 # Starting traefik-proxy service 
 docker-up-proxy:
 	docker network create proxy-public
@@ -42,7 +34,8 @@ docker-build-run:
 # You may add "-d" flag to "docker compose up" command if you prefer detached launch
 docker-full-rerun:
 	docker compose -f ${COMPOSE_FILE} down --rmi all
-	docker system prune -af
+	docker rmi ${APP_BASE_IMAGE}:${APP_BASE_IMAGE_TAG}
+	docker builder prune -f
 	make docker-build-run
 
 

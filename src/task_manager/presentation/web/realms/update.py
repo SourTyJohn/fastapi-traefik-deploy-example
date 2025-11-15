@@ -5,10 +5,18 @@ from dishka.integrations.fastapi import inject, FromDishka
 
 from task_manager.domain.models import RealmId, UserId
 from task_manager.application.exceptions import PermissionDeniedException
-from task_manager.application.interactors.realm_get import RealmGetInteractor
+from task_manager.application.interactors.realm_update import (
+    RealmUpdateInteractor,
+    RealmUpdateDTO,
+)
 
 
-class RealmGetResponse(BaseModel):
+class RealmUpdateRequest(BaseModel):
+    name: str
+    description: str | None = None
+
+
+class RealmUpdateResponse(BaseModel):
     realm_id: RealmId
     owner_id: UserId
     name: str
@@ -17,18 +25,24 @@ class RealmGetResponse(BaseModel):
 
 @inject
 async def route(
+    data: RealmUpdateRequest,
     user_id: FromDishka[UserId],
-    interactor: FromDishka[RealmGetInteractor],
-    realm_id: RealmId = Path(..., description="The ID of the realm to retrieve"),
-) -> RealmGetResponse:
+    interactor: FromDishka[RealmUpdateInteractor],
+    realm_id: RealmId = Path(..., description="The ID of the realm to update"),
+) -> RealmUpdateResponse:
     try:
-        realm = await interactor(realm_id, user_id)
+        realm = await interactor(
+            RealmUpdateDTO(
+                realm_id=realm_id,
+                user_id=user_id,
+                name=data.name,
+                description=data.description,
+            )
+        )
     except PermissionDeniedException:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={
-                "message": "Permission denied. Only the owner can access this realm."
-            },
+            detail={"message": "Permission denied. Only the owner can update this realm."},
         )
     except Exception:
         raise HTTPException(
@@ -42,9 +56,10 @@ async def route(
             detail={"message": "Realm data is invalid"},
         )
 
-    return RealmGetResponse(
+    return RealmUpdateResponse(
         realm_id=realm.uid,
         owner_id=realm.owner_uid,
         name=realm.name,
         description=realm.description,
     )
+

@@ -1,7 +1,7 @@
 [project]
 name = "fastapi-traefik-example"
 version = "0.1.0"
-description = "Simple example project with fastapi app, traefik reverse proxy, postgres and nginx for serving static files "
+description = "Simple example project with fastapi app, traefik reverse proxy, postgres and nginx for serving static files."
 authors = [
     {name = "SourTyJohn",email = "mr.ukhov@list.ru"}
 ]
@@ -19,9 +19,17 @@ dependencies = [
     "uvicorn (>=0.38.0,<0.39.0)",
     "passlib (>=1.7.4,<2.0.0)",
     "argon2-cffi (>=25.1.0,<26.0.0)",
+    "bcrypt (>=5.0.0,<6.0.0)",
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.0.1,<10.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "pytest-asyncio (>=1.3.0,<2.0.0)"
+]
