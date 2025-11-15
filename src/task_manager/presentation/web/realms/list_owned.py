@@ -6,7 +6,7 @@ from task_manager.application.interactors.realm_own_list import (
     RealmOwnListDTO,
     RealmOwnListResult,
 )
-from task_manager.presentation.web.deps import PaginationDep
+from task_manager.presentation.web.depends import PaginationDep
 
 
 @inject
