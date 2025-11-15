@@ -10,6 +10,7 @@
 - [ ] GitHub Actions CI/CD
 
 src directory stores backend
+
 docker directory stores Dockerfiles and entrypoints
 
 ## .env File
@@ -70,12 +71,12 @@ I am using Ruff (charliermarsh.ruff) extension for code formating
 
 ## Local deploy with http using compose
 
-Majority of required operations implemented in Makefile for convenience.
+Majority of required operations implemented in [Makefile](Makefile) for convenience.
 You may read it, to look under the hood of all operations.
 
 #### First run
 
-Firstly, you need to create network and up traefik proxy service using:
+Firstly, you need to create network and start traefik proxy service using:
 
 ```
 make docker-up-proxy
