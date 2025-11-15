@@ -1,14 +1,10 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from passlib.context import CryptContext
+from bcrypt import checkpw, hashpw, gensalt
 
 
 class EncryptionContext(Protocol):
-    @abstractmethod
-    def __init__(self) -> None:
-        raise NotImplementedError
-
     @abstractmethod
     def hash(self, data: str):
         raise NotImplementedError
@@ -19,14 +15,9 @@ class EncryptionContext(Protocol):
 
 
 class EncryptionContextPassword(EncryptionContext):
-    def __init__(self) -> None:
-        self.context = CryptContext(
-            schemes=["argon2", "bcrypt"],
-            deprecated="auto",
-        )
-
     def hash(self, data: str):
-        return self.context.hash(data)
+        salt = gensalt()
+        return hashpw(data.encode(), salt)
 
     def verify(self, data: str, hash: str):
-        return self.context.verify(data, hash)
+        return checkpw(data.encode(), hash.encode())
