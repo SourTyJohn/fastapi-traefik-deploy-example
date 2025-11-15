@@ -24,17 +24,13 @@ def main():
     command = [
         "alembic",
         "-c",
-        "alembic.ini",
+        "task_manager/adapters/alembic/alembic.ini",
         "revision",
         "-m",
         args.message,
     ]
     if not args.empty:
         command.insert(-2, "--autogenerate")
-
-    update_command = ["alembic", "-c", "alembic.ini", "upgrade", "head"]
-    print(f"EXECUTING: {' '.join(update_command)}")
-    subprocess.run(update_command)
 
     print(f"EXECUTING: {' '.join(command)}")
     exit(subprocess.call(command))

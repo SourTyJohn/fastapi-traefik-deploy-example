@@ -13,6 +13,14 @@ src directory stores backend
 
 docker directory stores Dockerfiles and entrypoints
 
+## Structure
+
+1. domain - business entities and services with logic
+2. application - defines usecases of api using interfaces
+3. adapters - infastucture layer, that implements application layer interfaces using real connections
+4. presentation - client`s entrypoint, defines FastApi routes
+5. bootstrap - assemble point
+
 ## .env File
 
 ```
@@ -112,6 +120,21 @@ make docker-full-rerun
 http://localhost/api/docs for FastAPI swagger view
 
 http://localhost:9000 for traefik dashboard
+
+
+## Other dev commands
+
+Generating migrations (from /src directory):
+
+```
+python3 task_manager.bootstrap.cli.makemigraions
+```
+
+Running migrations (from /src directory):
+
+```
+python3 task_manager.bootstrap.cli.migrate
+```
 
 
 ## Testing

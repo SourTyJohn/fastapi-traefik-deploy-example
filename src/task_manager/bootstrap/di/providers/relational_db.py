@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
 from dishka import Provider, Scope, provide, AnyOf
 
 from task_manager.application.common import AsyncTransactionManager
-from task_manager.config import Config
+from task_manager.bootstrap.config import Config
 
 from task_manager.adapters.postgres import (
     create_pg_session_maker,

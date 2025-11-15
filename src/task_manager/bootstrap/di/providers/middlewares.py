@@ -2,7 +2,7 @@ from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from dishka import Provider, Scope, provide
 
-from task_manager.config import Config
+from task_manager.bootstrap.config import Config
 from task_manager.presentation.middlewares.bearer_auth import (
     UserIdBearerProvider,
     TokenGateway,

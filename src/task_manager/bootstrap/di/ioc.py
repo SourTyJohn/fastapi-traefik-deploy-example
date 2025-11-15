@@ -5,7 +5,7 @@ from dishka import (
 
 from dishka.integrations.fastapi import FastapiProvider
 
-from task_manager.ioc.providers import (
+from task_manager.bootstrap.di.providers import (
     DbProvider,
     GatewaysProvider,
     ApiInteractorsProvider,

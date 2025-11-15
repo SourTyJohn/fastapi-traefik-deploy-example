@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from task_manager.adapters.postgres.base import metadata
-from task_manager.config import load_env_config
+from task_manager.bootstrap.config import load_env_config
 
 
 dotenv.load_dotenv()
