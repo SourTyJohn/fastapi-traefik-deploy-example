@@ -37,9 +37,9 @@ class AuthConfig:
 
 def load_env_config() -> Config:
     db_config = DbConfig(
-        DB_URI=f"postgresql+psycopg://{os.environ['DB_CONNECTION_STRING']}",
+        DB_URI=f"postgresql+psycopg://{os.getenv('DB_CONNECTION_STRING', '')}",
         DB_ECHO=int(os.environ["BACKEND_DB_ECHO"]),
-        TEST_DB_URI=f"postgresql+psycopg://{os.environ['TEST_DB_CONNECTION_STRING']}",
+        TEST_DB_URI=f"postgresql+psycopg://{os.getenv('TEST_DB_CONNECTION_STRING', '')}",
     )
 
     web_config = WebConfig(

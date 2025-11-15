@@ -111,3 +111,12 @@ make docker-full-rerun
 http://localhost/api/docs for FastAPI swagger view
 
 http://localhost:9000 for traefik dashboard
+
+
+## Testing
+
+Ensure you installed dev-dependencies with poetry
+
+```
+pytest ./tests
+```

@@ -9,13 +9,6 @@ COMPOSE_FILE_PROXY:= docker-compose.traefik.yaml
 .ONESHELL:
 
 
-build-python-venv:
-	python3 -m venv .venv
-	source ./.venv/bin/activate
-	pip3 install poetry
-	poetry install --no-root
-
-
 docker-up-proxy:
 	docker network create proxy-public
 	docker compose -f ${COMPOSE_FILE_PROXY} down
