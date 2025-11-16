@@ -5,7 +5,7 @@
 - [x] Nginx static files server
 - [x] Traefik proxy
 - [ ] Redis based api token verification
-- [ ] Traefik letsencrypt SSL for HTTPS
+- [x] Traefik letsencrypt SSL for HTTPS
 - [ ] Frontend
 - [ ] GitHub Actions CI/CD
 
@@ -115,12 +115,18 @@ make docker-full-rerun
 ```
 
 
-## Running
+#### Running
 
 http://localhost/api/docs for FastAPI swagger view
 
 http://localhost:9000 for traefik dashboard
 
+
+## Deploy with letsencrypt SSL
+
+```
+make docker-up-https
+```
 
 ## Other dev commands
 

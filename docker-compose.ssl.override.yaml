@@ -1,0 +1,48 @@
+services:
+    traefik:
+        command:
+            - "--providers.docker=true"
+            - "--providers.docker.exposedbydefault=false"
+
+            - "--entrypoints.web.address=:80"
+            - "--entrypoints.websecure.address=:443"
+            - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+            
+            # CERTRESOLVER == letsencrypt
+            - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+            - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+            - "--certificatesresolvers.letsencrypt.acme.email=${DOMAIN_EMAIL}"
+            - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+        labels:
+            - "traefik.docker.network=proxy-public"
+
+            - "traefik.enable=true"
+            - "traefik.http.middlewares.traefik-compress.compress=true"
+            - "traefik.http.routers.traefik.service=api@internal"
+            - "traefik.http.routers.traefik.middlewares=traefik-compress"
+
+            - "traefik.http.routers.traefik.entrypoints=websecure"
+            - "traefik.http.routers.traefik.tls.certresolver=${CERTRESOLVER}"
+            - "traefik.http.routers.dashboard.tls=true"
+
+
+    app:
+        labels:
+            - traefik.http.middlewares.app_https.redirectscheme.scheme=https
+            - traefik.http.routers.app.middlewares=app_https@docker
+            - traefik.http.routers.app_https.rule=Host(`${DOMAIN_URL}`) && PathPrefix(`${NETWORK_BACKEND_URL}`)
+
+            - traefik.http.routers.app_https.entrypoints=websecure
+            - traefik.http.routers.app_https.tls.certresolver=${CERTRESOLVER}
+            - traefik.http.routers.app_https.tls=true
+
+
+    nginx-server:
+        labels:
+            - traefik.http.middlewares.nginx-server_https.redirectscheme.scheme=https  
+            - traefik.http.routers.nginx-server.middlewares=nginx-server_https@docker
+            - traefik.http.routers.nginx-server_https.rule=PathPrefix(`${NETWORK_NGINX_STATIC_URL}`)
+
+            - traefik.http.routers.nginx-server_https.entrypoints=websecure
+            - traefik.http.routers.nginx-server_https.tls.certresolver=${CERTRESOLVER}
+            - traefik.http.routers.nginx-server_https.tls=true

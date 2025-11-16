@@ -9,6 +9,12 @@ COMPOSE_FILE_PROXY:= docker-compose.traefik.yaml
 .ONESHELL:
 
 
+# Deploy production-ready with https
+docker-up-https:
+	docker network create proxy-public
+	docker compose --env-file ${ENV_FILE} -f docker-compose.yaml -f docker-compose.traefik.yaml -f docker-compose.ssl.override.yaml up -d --build --remove-orphans
+
+
 # Starting traefik-proxy service 
 docker-up-proxy:
 	docker network create proxy-public
