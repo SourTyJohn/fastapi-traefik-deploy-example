@@ -33,7 +33,9 @@ def mock_user_gateway():
 
 
 @pytest.fixture
-def realm_own_list_interactor(mock_transaction, mock_realm_gateway, mock_user_gateway):
+def realm_own_list_interactor(
+    mock_transaction, mock_realm_gateway, mock_user_gateway
+):
     """Create RealmOwnListInteractorImpl with mocked dependencies."""
     return RealmOwnListInteractorImpl(
         transaction=mock_transaction,
@@ -63,7 +65,7 @@ async def test_realm_own_list_interactor_success(
     # Setup mocks
     assert test_user.uid is not None
     mock_user_gateway.get = AsyncMock(return_value=test_user)
-    
+
     realm1 = Realm(
         uid=RealmId(IdType(uuid.uuid4())),
         owner_uid=test_user.uid,
@@ -77,7 +79,7 @@ async def test_realm_own_list_interactor_success(
         description="Description 2",
     )
     mock_realm_gateway.read = AsyncMock(return_value=[realm1, realm2])
-    
+
     # Execute
     dto = RealmOwnListDTO(
         user_id=test_user.uid,
@@ -85,7 +87,7 @@ async def test_realm_own_list_interactor_success(
         pagination_offset=0,
     )
     result = await realm_own_list_interactor(dto)
-    
+
     # Verify
     assert len(result.realms) == 2
     assert result.realms[0].name == "Realm 1"
@@ -110,7 +112,7 @@ async def test_realm_own_list_interactor_with_pagination(
     assert test_user.uid is not None
     mock_user_gateway.get = AsyncMock(return_value=test_user)
     mock_realm_gateway.read = AsyncMock(return_value=[])
-    
+
     # Execute
     dto = RealmOwnListDTO(
         user_id=test_user.uid,
@@ -118,7 +120,7 @@ async def test_realm_own_list_interactor_with_pagination(
         pagination_offset=10,
     )
     result = await realm_own_list_interactor(dto)
-    
+
     # Verify
     assert len(result.realms) == 0
     mock_realm_gateway.read.assert_called_once_with(
@@ -140,7 +142,7 @@ async def test_realm_own_list_interactor_empty_list(
     assert test_user.uid is not None
     mock_user_gateway.get = AsyncMock(return_value=test_user)
     mock_realm_gateway.read = AsyncMock(return_value=[])
-    
+
     # Execute
     dto = RealmOwnListDTO(
         user_id=test_user.uid,
@@ -148,7 +150,6 @@ async def test_realm_own_list_interactor_empty_list(
         pagination_offset=0,
     )
     result = await realm_own_list_interactor(dto)
-    
+
     # Verify
     assert len(result.realms) == 0
-

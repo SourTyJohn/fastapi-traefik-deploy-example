@@ -35,7 +35,9 @@ def mock_encryption_context():
 
 
 @pytest.fixture
-def user_register_interactor(mock_transaction, mock_user_gateway, mock_encryption_context):
+def user_register_interactor(
+    mock_transaction, mock_user_gateway, mock_encryption_context
+):
     """Create UserRegisterInteractorImpl with mocked dependencies."""
     return UserRegisterInteractorImpl(
         transaction=mock_transaction,
@@ -53,21 +55,23 @@ async def test_user_register_interactor_success(
 ):
     """Test successful user registration."""
     # Setup mocks
-    mock_user_gateway.read_by_username.return_value = None  # Username not taken
+    mock_user_gateway.read_by_username.return_value = (
+        None  # Username not taken
+    )
     user_id = UserId(IdType(uuid.uuid4()))
     mock_user_gateway.add = AsyncMock(return_value=user_id)
-    
+
     # Execute
     dto = UserRegisterDTO(username="newuser", password="plainpassword")
     result = await user_register_interactor(dto)
-    
+
     # Verify
     assert result == user_id
     mock_user_gateway.read_by_username.assert_called_once_with("newuser")
     mock_encryption_context.hash.assert_called_once_with("plainpassword")
     mock_user_gateway.add.assert_called_once()
     mock_transaction.commit.assert_called_once()
-    
+
     # Verify the user passed to add has hashed password
     added_user = mock_user_gateway.add.call_args[0][0]
     assert added_user.username == "newuser"
@@ -88,13 +92,12 @@ async def test_user_register_interactor_username_taken(
         password="hashed",
     )
     mock_user_gateway.read_by_username.return_value = existing_user
-    
+
     # Execute and verify exception
     dto = UserRegisterDTO(username="takenuser", password="password")
-    
+
     with pytest.raises(UsernameTakenExeption):
         await user_register_interactor(dto)
-    
+
     # Verify add was not called
     mock_user_gateway.add.assert_not_called()
-

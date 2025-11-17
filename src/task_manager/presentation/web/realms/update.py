@@ -42,7 +42,9 @@ async def route(
     except PermissionDeniedException:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"message": "Permission denied. Only the owner can update this realm."},
+            detail={
+                "message": "Permission denied. Only the owner can update this realm."
+            },
         )
     except Exception:
         raise HTTPException(
@@ -62,4 +64,3 @@ async def route(
         name=realm.name,
         description=realm.description,
     )
-

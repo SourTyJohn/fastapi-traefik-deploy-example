@@ -35,7 +35,9 @@ def mock_user_gateway():
 
 
 @pytest.fixture
-def realm_update_interactor(mock_transaction, mock_realm_gateway, mock_user_gateway):
+def realm_update_interactor(
+    mock_transaction, mock_realm_gateway, mock_user_gateway
+):
     """Create RealmUpdateInteractorImpl with mocked dependencies."""
     return RealmUpdateInteractorImpl(
         transaction=mock_transaction,
@@ -80,7 +82,7 @@ async def test_realm_update_interactor_success(
     mock_realm_gateway.get = AsyncMock(return_value=test_realm)
     mock_user_gateway.get = AsyncMock(return_value=test_user)
     mock_realm_gateway.update = AsyncMock()
-    
+
     # Execute
     dto = RealmUpdateDTO(
         realm_id=test_realm.uid,
@@ -89,7 +91,7 @@ async def test_realm_update_interactor_success(
         description="Updated Description",
     )
     result = await realm_update_interactor(dto)
-    
+
     # Verify
     assert result.name == "Updated Name"
     assert result.description == "Updated Description"
@@ -117,7 +119,7 @@ async def test_realm_update_interactor_permission_denied(
     assert other_user.uid is not None
     mock_realm_gateway.get = AsyncMock(return_value=test_realm)
     mock_user_gateway.get = AsyncMock(return_value=other_user)
-    
+
     # Execute and verify exception
     dto = RealmUpdateDTO(
         realm_id=test_realm.uid,
@@ -125,10 +127,10 @@ async def test_realm_update_interactor_permission_denied(
         name="Hacked Name",
         description="Hacked Description",
     )
-    
+
     with pytest.raises(PermissionDeniedException):
         await realm_update_interactor(dto)
-    
+
     # Verify update was not called
     mock_realm_gateway.update.assert_not_called()
 
@@ -147,7 +149,7 @@ async def test_realm_update_interactor_with_none_description(
     mock_realm_gateway.get = AsyncMock(return_value=test_realm)
     mock_user_gateway.get = AsyncMock(return_value=test_user)
     mock_realm_gateway.update = AsyncMock()
-    
+
     # Execute
     dto = RealmUpdateDTO(
         realm_id=test_realm.uid,
@@ -156,8 +158,7 @@ async def test_realm_update_interactor_with_none_description(
         description=None,
     )
     result = await realm_update_interactor(dto)
-    
+
     # Verify
     assert result.name == "Updated Name"
     assert result.description is None
-

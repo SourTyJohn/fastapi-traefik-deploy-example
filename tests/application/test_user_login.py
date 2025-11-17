@@ -32,7 +32,9 @@ def mock_encryption_context():
 
 
 @pytest.fixture
-def user_login_interactor(mock_transaction, mock_user_gateway, mock_encryption_context):
+def user_login_interactor(
+    mock_transaction, mock_user_gateway, mock_encryption_context
+):
     """Create UserLoginInteractorImpl with mocked dependencies."""
     return UserLoginInteractorImpl(
         transaction=mock_transaction,
@@ -57,14 +59,16 @@ async def test_user_login_interactor_success(
     )
     mock_user_gateway.read_by_username = AsyncMock(return_value=user)
     mock_encryption_context.verify = MagicMock(return_value=True)
-    
+
     # Execute
     result = await user_login_interactor("testuser", "plainpassword")
-    
+
     # Verify
     assert result == user_id
     mock_user_gateway.read_by_username.assert_called_once_with("testuser")
-    mock_encryption_context.verify.assert_called_once_with("plainpassword", "hashed_password")
+    mock_encryption_context.verify.assert_called_once_with(
+        "plainpassword", "hashed_password"
+    )
 
 
 @pytest.mark.asyncio
@@ -75,7 +79,7 @@ async def test_user_login_interactor_user_not_found(
     """Test login with non-existent user."""
     # Setup mocks
     mock_user_gateway.read_by_username = AsyncMock(return_value=None)
-    
+
     # Execute and verify exception
     with pytest.raises(InvalidCredentialsException):
         await user_login_interactor("nonexistent", "password")
@@ -97,12 +101,14 @@ async def test_user_login_interactor_invalid_password(
     )
     mock_user_gateway.read_by_username = AsyncMock(return_value=user)
     mock_encryption_context.verify = MagicMock(return_value=False)
-    
+
     # Execute and verify exception
     with pytest.raises(InvalidCredentialsException):
         await user_login_interactor("testuser", "wrongpassword")
-    
-    mock_encryption_context.verify.assert_called_once_with("wrongpassword", "hashed_password")
+
+    mock_encryption_context.verify.assert_called_once_with(
+        "wrongpassword", "hashed_password"
+    )
 
 
 @pytest.mark.asyncio
@@ -120,8 +126,7 @@ async def test_user_login_interactor_user_without_id(
     )
     mock_user_gateway.read_by_username = AsyncMock(return_value=user)
     mock_encryption_context.verify = MagicMock(return_value=True)
-    
+
     # Execute and verify exception
     with pytest.raises(InvalidCredentialsException):
         await user_login_interactor("testuser", "password")
-

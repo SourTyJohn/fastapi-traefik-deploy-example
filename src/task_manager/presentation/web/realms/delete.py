@@ -4,7 +4,9 @@ from dishka.integrations.fastapi import inject, FromDishka
 
 from task_manager.domain.models import RealmId, UserId
 from task_manager.application.exceptions import PermissionDeniedException
-from task_manager.application.interactors.realm_delete import RealmDeleteInteractor
+from task_manager.application.interactors.realm_delete import (
+    RealmDeleteInteractor,
+)
 
 
 @inject
@@ -18,7 +20,9 @@ async def route(
     except PermissionDeniedException:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"message": "Permission denied. Only the owner can delete this realm."},
+            detail={
+                "message": "Permission denied. Only the owner can delete this realm."
+            },
         )
     except Exception:
         raise HTTPException(
@@ -27,4 +31,3 @@ async def route(
         )
 
     return {"message": "Realm deleted successfully"}
-

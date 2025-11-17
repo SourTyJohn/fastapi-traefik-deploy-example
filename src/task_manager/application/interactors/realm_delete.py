@@ -46,4 +46,3 @@ class RealmDeleteInteractorImpl(RealmDeleteInteractor):
 
         await self.realm_gateway.delete(realm)
         await self.transaction.commit()
-

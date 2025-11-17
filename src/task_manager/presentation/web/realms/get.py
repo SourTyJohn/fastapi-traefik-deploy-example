@@ -19,7 +19,9 @@ class RealmGetResponse(BaseModel):
 async def route(
     user_id: FromDishka[UserId],
     interactor: FromDishka[RealmGetInteractor],
-    realm_id: RealmId = Path(..., description="The ID of the realm to retrieve"),
+    realm_id: RealmId = Path(
+        ..., description="The ID of the realm to retrieve"
+    ),
 ) -> RealmGetResponse:
     try:
         realm = await interactor(realm_id, user_id)
